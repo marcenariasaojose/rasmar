@@ -400,7 +400,7 @@
     <p style="font-size:13px; line-height:1.6; margin:0 0 10px;">Clique em "Defeito" na peça (ou "⚠ Defeito no módulo" se o problema for no módulo inteiro). Escolha a causa — método, máquina, mão de obra, material, medição ou meio ambiente — escreva uma observação se quiser, e escolha entre <strong>retrabalhar</strong> (a peça volta pra uma etapa escolhida por você) ou <strong>descartar</strong> (a peça é jogada fora e recriada do zero).</p>
 
     <h3 style="font-size:14px; margin:16px 0 6px; color:var(--brand-dark);">7. Administração (só pra quem é admin)</h3>
-    <p style="font-size:13px; line-height:1.6; margin:0 0 10px;">Na primeira vez num servidor novo, um <strong>assistente de configuração</strong> abre sozinho e guia tudo (nome, horário, etapas, onde a peça nasce e o primeiro CSV) — dá pra refazer depois pelo botão 🧭 no topo da Administração. Aqui também: o <strong>link de acesso da equipe</strong> (mande no WhatsApp: quem abre por ele já fica conectado ao servidor certo, sem digitar nada), e criar/editar usuários (login, senha, e-mail, se pode excluir/cadastrar/concluir sem bipar/acessar o dashboard, e quais etapas cada um pode ver), configurar o <strong>nome da marcenaria</strong>, o <strong>horário de trabalho</strong>, <strong>onde uma peça nova nasce</strong> ao importar CSV ou cadastrar manualmente, e as <strong>etapas de produção</strong> — adicionar, remover, reordenar, escolher o tipo (peça/módulo/pedido inteiro), a métrica de rateio, e em quais abas do dashboard (Kanban, OEE) cada uma aparece. Tem também as <strong>colunas do CSV de importação</strong> — se o arquivo que sai do seu WPS/otimizador tiver o código da peça (nesting) ou a descrição em colunas diferentes do padrão, ajusta ali usando a letra de planilha (a mesma do Excel/Sheets: A, B, C... Z, AA...); isso também aparece no assistente de configuração, no passo do primeiro CSV. Também tem backup manual e a "Zona de risco" pra apagar tudo, se precisar.</p>
+    <p style="font-size:13px; line-height:1.6; margin:0 0 10px;">Na primeira vez num servidor novo, um <strong>assistente de configuração</strong> abre sozinho e guia tudo (nome, horário, etapas, onde a peça nasce e o primeiro CSV) — dá pra refazer depois pelo botão 🧭 no topo da Administração. Aqui também: o <strong>link de acesso da equipe</strong> (mande no WhatsApp: quem abre por ele já fica conectado ao servidor certo, sem digitar nada), e criar/editar usuários (login, senha, e-mail, se pode excluir/cadastrar/concluir sem bipar/acessar o dashboard, e quais etapas cada um pode ver), configurar o <strong>nome da marcenaria</strong>, o <strong>horário de trabalho</strong>, <strong>onde uma peça nova nasce</strong> ao importar CSV ou cadastrar manualmente, e as <strong>etapas de produção</strong> — adicionar, remover, reordenar, escolher o tipo (peça/módulo/pedido inteiro), a métrica de rateio, e em quais abas do dashboard (Kanban, OEE) cada uma aparece. Tem também as <strong>colunas do CSV de importação</strong> — os 13 campos que o WPS/otimizador exporta (ID e nome do módulo, comprimento, largura, material, descrição, as 4 bordas, cliente, projeto e o código da peça/nesting), cada um configurável separadamente usando a letra de planilha (a mesma do Excel/Sheets: A, B, C... Z, AA...) caso o layout do seu arquivo seja diferente do padrão; isso também aparece no assistente de configuração, no passo do primeiro CSV. Também tem backup manual e a "Zona de risco" pra apagar tudo, se precisar.</p>
 
     <h3 style="font-size:14px; margin:16px 0 6px; color:var(--brand-dark);">8. O Dashboard — o que cada aba mostra</h3>
     <p style="font-size:13px; line-height:1.6; margin:0 0 6px;">O Dashboard é onde dá pra ver como a produção está indo. Só quem tem a permissão "ver dashboard" (ou é admin) consegue entrar. No topo tem o botão <strong>🔄 Sincronizar</strong> e o estado da conexão (🟢 sincronizado / 🔴 sem conexão) — qualquer usuário pode usar, não precisa passar pela Administração. Tem várias abas:</p>
@@ -552,16 +552,7 @@
     <div style="margin-top:20px; border:1px solid var(--border-accent); border-radius:var(--radius); padding:12px 14px;">
       <p style="font-weight:600; font-size:13px; margin:0 0 6px; color:var(--brand-dark);">Colunas do CSV de importação (nesting file do WPS)</p>
       <p style="font-size:12px; color:var(--text-muted); margin:0 0 10px;">Se o arquivo que você exporta do WPS tiver um layout diferente do padrão, ajuste aqui em qual coluna fica cada informação — use a letra de planilha (a mesma letra que aparece se você abrir o CSV no Excel/Sheets: A, B, C... Z, AA, AB...).</p>
-      <div style="display:flex; gap:16px; flex-wrap:wrap;">
-        <div>
-          <label class="rot" for="colColunaNesting" style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">coluna do código da peça (nesting)</label>
-          <input id="colColunaNesting" type="text" maxlength="3" style="width:70px; text-align:center; text-transform:uppercase;" />
-        </div>
-        <div>
-          <label class="rot" for="colColunaDescricao" style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">coluna da descrição da peça</label>
-          <input id="colColunaDescricao" type="text" maxlength="3" style="width:70px; text-align:center; text-transform:uppercase;" />
-        </div>
-      </div>
+      <div id="gradeColunasCsv" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px;"></div>
       <p id="statusColunasCsv" style="font-size:12px; margin:10px 0 0; display:none;"></p>
     </div>
 
@@ -1194,13 +1185,29 @@ function atualizarSemiCabecalho(){
 }
 setInterval(atualizarSemiCabecalho, 1000);
 
-const COL_ID = 0, COL_PRODUTO = 1, COL_COMPRIMENTO = 3, COL_LARGURA = 5, COL_MATERIAL = 7, COL_BORDA_FRONTAL = 12, COL_BORDA_TRASEIRA = 13, COL_BORDA_ESQUERDA = 14, COL_BORDA_DIREITA = 15, COL_CLIENTE = 18, COL_PROJETO = 19;
-// coluna do "nesting" (usada como código da peça) e da descrição — eram
-// fixas (W e K) mas cada marcenaria pode exportar do WPS com o layout um
-// pouco diferente, então viraram configuráveis (letra de planilha, tipo
-// numa coluna do Excel) em Administração e no assistente de configuração.
-let colunaNestingCsv = 'W';
-let colunaDescricaoCsv = 'K';
+// mapa das colunas do CSV de importação (nesting file do WPS/otimizador)
+// — TODAS configuráveis por letra de planilha (a mesma letra que aparece
+// se abrir o CSV no Excel/Sheets), porque o layout exportado varia de
+// marcenaria pra marcenaria. Essa lista também GERA a interface (em
+// Administração e no assistente) — acrescentar um campo aqui já cria o
+// campo na tela sozinho, sem precisar repetir HTML.
+const CAMPOS_CSV_CONFIGURAVEIS = [
+  { chave: 'id', label: 'ID do módulo', padrao: 'A' },
+  { chave: 'produto', label: 'nome do módulo (produto)', padrao: 'B' },
+  { chave: 'comprimento', label: 'comprimento da peça', padrao: 'D' },
+  { chave: 'largura', label: 'largura da peça', padrao: 'F' },
+  { chave: 'material', label: 'material (com a espessura embutida, ex: MDF_18_BRANCO)', padrao: 'H' },
+  { chave: 'descricao', label: 'descrição da peça', padrao: 'K' },
+  { chave: 'bordaFrontal', label: 'fita de borda — frontal', padrao: 'M' },
+  { chave: 'bordaTraseira', label: 'fita de borda — traseira', padrao: 'N' },
+  { chave: 'bordaEsquerda', label: 'fita de borda — esquerda', padrao: 'O' },
+  { chave: 'bordaDireita', label: 'fita de borda — direita', padrao: 'P' },
+  { chave: 'cliente', label: 'cliente', padrao: 'S' },
+  { chave: 'projeto', label: 'projeto', padrao: 'T' },
+  { chave: 'nesting', label: 'código da peça (nesting)', padrao: 'W' },
+];
+let colunasCsv = {};
+CAMPOS_CSV_CONFIGURAVEIS.forEach(c => { colunasCsv[c.chave] = c.padrao; });
 // converte uma letra de coluna (A, B, ..., Z, AA, AB, ...) pro índice
 // numérico que o parseCSV usa (A=0, B=1, ..., Z=25, AA=26...).
 function letraParaIndiceColuna(letra){
@@ -2874,11 +2881,17 @@ document.getElementById('scanInput').addEventListener('keydown', async e => {
 
 // ---------- importador de CSV ----------
 function parseCSV(texto){
-  // resolve as duas colunas configuráveis agora (com um valor de reserva
-  // pro padrão de sempre, caso a letra digitada em Administração não seja
-  // uma letra válida por algum motivo — nunca trava a importação por isso).
-  const COL_NESTING = letraParaIndiceColuna(colunaNestingCsv) ?? 22;
-  const COL_DESCRICAO = letraParaIndiceColuna(colunaDescricaoCsv) ?? 10;
+  // resolve TODAS as colunas configuráveis agora (com um valor de reserva
+  // pro padrão de fábrica de cada uma, caso a letra guardada não seja
+  // válida por algum motivo — nunca trava a importação por isso).
+  const idx = {};
+  CAMPOS_CSV_CONFIGURAVEIS.forEach(c => {
+    idx[c.chave] = letraParaIndiceColuna(colunasCsv[c.chave]) ?? letraParaIndiceColuna(c.padrao);
+  });
+  const COL_ID = idx.id, COL_PRODUTO = idx.produto, COL_COMPRIMENTO = idx.comprimento, COL_LARGURA = idx.largura,
+    COL_MATERIAL = idx.material, COL_DESCRICAO = idx.descricao, COL_BORDA_FRONTAL = idx.bordaFrontal,
+    COL_BORDA_TRASEIRA = idx.bordaTraseira, COL_BORDA_ESQUERDA = idx.bordaEsquerda, COL_BORDA_DIREITA = idx.bordaDireita,
+    COL_CLIENTE = idx.cliente, COL_PROJETO = idx.projeto, COL_NESTING = idx.nesting;
   const linhas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
   const dados = linhas.slice(1).map(l => l.split(';')).filter(c => c[COL_ID] && c[COL_ID].trim());
   if (dados.length === 0) return null;
@@ -3107,7 +3120,7 @@ function buscarEstadoServidor(){
 // sendo o retrato completo de cada vez.
 function enviarEstadoServidor(salvoEmAnterior, logsNovos, movimentosNovos, checklistsNovos, confirmarZerarTudo, confirmarZerarUsuarios){
   return new Promise((resolve, reject) => {
-    const corpo = { projetos, proximoNumeroPedido, usuarios, logsNovos, movimentosNovos, checklistsNovos, configuracaoHorario, estacoes: stations, nomeMarcenaria, estacaoInicialId, checklistTemplate, colunaNestingCsv, colunaDescricaoCsv };
+    const corpo = { projetos, proximoNumeroPedido, usuarios, logsNovos, movimentosNovos, checklistsNovos, configuracaoHorario, estacoes: stations, nomeMarcenaria, estacaoInicialId, checklistTemplate, colunasCsv };
     if (typeof onboardingConcluido === 'boolean') corpo.onboardingConcluido = onboardingConcluido;
     if (confirmarZerarTudo) corpo.confirmarZerarTudo = true;
     if (confirmarZerarUsuarios) corpo.confirmarZerarUsuarios = true;
@@ -3166,8 +3179,7 @@ async function carregarDoServidorAgora_lancaErro(){
   if (typeof dados.estacaoInicialId === 'string' || dados.estacaoInicialId === null) estacaoInicialId = dados.estacaoInicialId;
   if (typeof dados.onboardingConcluido === 'boolean') onboardingConcluido = dados.onboardingConcluido;
   if (Array.isArray(dados.checklistTemplate) && dados.checklistTemplate.length) checklistTemplate = dados.checklistTemplate;
-  if (typeof dados.colunaNestingCsv === 'string' && dados.colunaNestingCsv) colunaNestingCsv = dados.colunaNestingCsv;
-  if (typeof dados.colunaDescricaoCsv === 'string' && dados.colunaDescricaoCsv) colunaDescricaoCsv = dados.colunaDescricaoCsv;
+  if (dados.colunasCsv && typeof dados.colunasCsv === 'object') Object.assign(colunasCsv, dados.colunasCsv);
   aplicarNomeMarcenariaNaTela();
   if (usuarioLogadoNome && !getUsuarioLogado()){
     usuarioLogadoNome = null;
@@ -3664,8 +3676,7 @@ document.getElementById('btnAbrirAdmin').onclick = () => {
   popularSelectEstacaoInicial();
   popularLinkAcessoEquipe();
   renderListaTemplateChecklist();
-  document.getElementById('colColunaNesting').value = colunaNestingCsv;
-  document.getElementById('colColunaDescricao').value = colunaDescricaoCsv;
+  renderGradeColunasCsv();
 };
 document.getElementById('btnFecharAdmin').onclick = () => { document.getElementById('telaAdmin').style.display = 'none'; };
 
@@ -3707,7 +3718,10 @@ function montarLinkAcessoEquipe(){
 }
 
 // ---------- colunas do CSV (nesting file) configuráveis ----------
-function validarESalvarColunaCsv(inputEl, nomeCampo, aplicar, statusElId){
+// valida e grava a coluna de UM campo (chave em colunasCsv); statusElId
+// deixa reaproveitar essa mesma função tanto em Administração quanto no
+// assistente, cada um com seu próprio elemento de aviso.
+function validarESalvarColunaCsv(inputEl, chave, label, statusElId){
   const statusEl = document.getElementById(statusElId || 'statusColunasCsv');
   const letra = inputEl.value.trim().toUpperCase();
   inputEl.value = letra;
@@ -3717,19 +3731,28 @@ function validarESalvarColunaCsv(inputEl, nomeCampo, aplicar, statusElId){
     statusEl.style.display = 'block';
     return;
   }
-  aplicar(letra);
-  registrarLog('mudou a coluna do CSV de ' + nomeCampo + ' pra "' + letra + '"');
+  colunasCsv[chave] = letra;
+  registrarLog('mudou a coluna do CSV de "' + label + '" pra "' + letra + '"');
   agendarSincronizacaoRapida();
-  statusEl.textContent = '✅ coluna de ' + nomeCampo + ' salva: "' + letra + '" (índice ' + letraParaIndiceColuna(letra) + ')';
+  statusEl.textContent = '✅ coluna de "' + label + '" salva: "' + letra + '" (índice ' + letraParaIndiceColuna(letra) + ')';
   statusEl.style.color = 'var(--text-success)';
   statusEl.style.display = 'block';
 }
-document.getElementById('colColunaNesting').addEventListener('change', () => {
-  validarESalvarColunaCsv(document.getElementById('colColunaNesting'), 'código da peça (nesting)', v => { colunaNestingCsv = v; });
-});
-document.getElementById('colColunaDescricao').addEventListener('change', () => {
-  validarESalvarColunaCsv(document.getElementById('colColunaDescricao'), 'descrição da peça', v => { colunaDescricaoCsv = v; });
-});
+// monta a grade de campos em Administração a partir de CAMPOS_CSV_CONFIGURAVEIS
+function renderGradeColunasCsv(){
+  const el = document.getElementById('gradeColunasCsv');
+  if (!el) return;
+  el.innerHTML = CAMPOS_CSV_CONFIGURAVEIS.map(c =>
+    '<div><label class="rot" for="colCsv_' + c.chave + '" style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">' + escaparHtml(c.label) + '</label>' +
+    '<input id="colCsv_' + c.chave + '" data-chave="' + c.chave + '" type="text" maxlength="3" value="' + escaparHtml(colunasCsv[c.chave]) + '" style="width:70px; text-align:center; text-transform:uppercase;" /></div>'
+  ).join('');
+  el.querySelectorAll('input[data-chave]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const campo = CAMPOS_CSV_CONFIGURAVEIS.find(c => c.chave === inp.dataset.chave);
+      validarESalvarColunaCsv(inp, campo.chave, campo.label);
+    });
+  });
+}
 
 function renderListaTemplateChecklist(){
   const el = document.getElementById('listaTemplateChecklist');
@@ -3855,9 +3878,8 @@ function renderAssistente(){
       '<p class="asTexto">Exporte o plano de corte do WPS (ou do seu otimizador) em <strong>CSV</strong> e importe aqui: as peças, os módulos e as medidas entram sozinhos, já prontas pra bipar. Dá pra fazer agora ou depois, pelo botão <em>Importar CSV</em> da tela principal.</p>' +
       '<div class="asGrupo"><div class="asGrupoTit">Confira as colunas do seu CSV</div>' +
       '<p class="asAjuda">Se o seu arquivo exportado do WPS tiver um layout diferente do padrão, ajuste aqui — use a letra de coluna de planilha (a mesma se abrisse o CSV no Excel/Sheets). Se não souber, deixe como está; dá pra mudar depois em Administração.</p>' +
-      '<div style="display:flex; gap:16px; flex-wrap:wrap;">' +
-        '<div><label class="asRot" for="asColunaNesting">coluna do código da peça (nesting)</label><input id="asColunaNesting" type="text" maxlength="3" value="' + asEsc(colunaNestingCsv) + '" style="width:70px; text-align:center; text-transform:uppercase;" /></div>' +
-        '<div><label class="asRot" for="asColunaDescricao">coluna da descrição</label><input id="asColunaDescricao" type="text" maxlength="3" value="' + asEsc(colunaDescricaoCsv) + '" style="width:70px; text-align:center; text-transform:uppercase;" /></div>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">' +
+        CAMPOS_CSV_CONFIGURAVEIS.map(c => '<div><label class="asRot" for="asCsv_' + c.chave + '">' + asEsc(c.label) + '</label><input id="asCsv_' + c.chave + '" data-chave="' + c.chave + '" type="text" maxlength="3" value="' + asEsc(colunasCsv[c.chave]) + '" style="width:70px; text-align:center; text-transform:uppercase;" /></div>').join('') +
       '</div>' +
       '<p id="statusColunasCsvAssistente" style="font-size:12px; margin:8px 0 0; display:none;"></p>' +
       '</div>' +
@@ -3996,11 +4018,9 @@ document.getElementById('asVoltar').onclick = () => {
 // colunas do CSV configuráveis, direto no último passo do assistente —
 // reaproveita a mesma validação/gravação da tela de Administração.
 document.getElementById('asCorpo').addEventListener('change', (ev) => {
-  if (ev.target.id === 'asColunaNesting'){
-    validarESalvarColunaCsv(ev.target, 'código da peça (nesting)', v => { colunaNestingCsv = v; }, 'statusColunasCsvAssistente');
-  } else if (ev.target.id === 'asColunaDescricao'){
-    validarESalvarColunaCsv(ev.target, 'descrição da peça', v => { colunaDescricaoCsv = v; }, 'statusColunasCsvAssistente');
-  }
+  if (!ev.target.dataset || !ev.target.dataset.chave) return;
+  const campo = CAMPOS_CSV_CONFIGURAVEIS.find(c => c.chave === ev.target.dataset.chave);
+  if (campo) validarESalvarColunaCsv(ev.target, campo.chave, campo.label, 'statusColunasCsvAssistente');
 });
 // ações dentro dos grupos de etapas (subir, descer, remover, adicionar) + botões do último passo
 document.getElementById('asCorpo').addEventListener('click', (ev) => {
