@@ -40,6 +40,11 @@ function estadoPadrao(){
       'Medidas conferem com o projeto?',
       'Kit de instalação completo (parafusos, buchas, ferramentas)?'
     ],
+    // colunas do CSV do WPS (nesting file) onde ficam o código da peça
+    // (nesting) e a descrição — configurável porque o layout exportado
+    // pode variar de marcenaria pra marcenaria.
+    colunaNestingCsv: 'W',
+    colunaDescricaoCsv: 'K',
     // sugestão de horário comercial — o admin pode mudar isso a qualquer
     // hora pela tela de Administração; usado só pra calcular "tempo útil"
     // no dashboard (não trava nem impede bipar fora desse horário).
@@ -220,7 +225,7 @@ function tratarGet(url, res){
     resultado = {
       projetos: db.projetos, proximoNumeroPedido: db.proximoNumeroPedido,
       usuarios: db.usuarios, logs: db.logs, movimentos: db.movimentos,
-      configuracaoHorario: db.configuracaoHorario, estacoes: db.estacoes, nomeMarcenaria: db.nomeMarcenaria, estacaoInicialId: db.estacaoInicialId, onboardingConcluido: db.onboardingConcluido, checklistTemplate: db.checklistTemplate, checklists: db.checklists,
+      configuracaoHorario: db.configuracaoHorario, estacoes: db.estacoes, nomeMarcenaria: db.nomeMarcenaria, estacaoInicialId: db.estacaoInicialId, onboardingConcluido: db.onboardingConcluido, checklistTemplate: db.checklistTemplate, checklists: db.checklists, colunaNestingCsv: db.colunaNestingCsv, colunaDescricaoCsv: db.colunaDescricaoCsv,
       geradoEm: timestampLocal()
     };
   } else if (acao === 'checklists'){
@@ -228,7 +233,7 @@ function tratarGet(url, res){
   } else if (acao === 'listarBackups'){
     resultado = { backups: listarArquivosBackup() };
   } else {
-    resultado = { projetos: db.projetos, proximoNumeroPedido: db.proximoNumeroPedido, usuarios: db.usuarios, salvoEm: db.salvoEm, configuracaoHorario: db.configuracaoHorario, estacoes: db.estacoes, nomeMarcenaria: db.nomeMarcenaria, estacaoInicialId: db.estacaoInicialId, onboardingConcluido: db.onboardingConcluido, checklistTemplate: db.checklistTemplate };
+    resultado = { projetos: db.projetos, proximoNumeroPedido: db.proximoNumeroPedido, usuarios: db.usuarios, salvoEm: db.salvoEm, configuracaoHorario: db.configuracaoHorario, estacoes: db.estacoes, nomeMarcenaria: db.nomeMarcenaria, estacaoInicialId: db.estacaoInicialId, onboardingConcluido: db.onboardingConcluido, checklistTemplate: db.checklistTemplate, colunaNestingCsv: db.colunaNestingCsv, colunaDescricaoCsv: db.colunaDescricaoCsv };
   }
   resultado.chamadasHoje = chamadasHoje;
   const json = JSON.stringify(resultado);
@@ -319,6 +324,8 @@ function aplicarPost(corpo){
       onboardingConcluido: (typeof b.onboardingConcluido === 'boolean') ? b.onboardingConcluido : undefined,
       checklists: Array.isArray(b.checklists) ? b.checklists : [],
       checklistTemplate: Array.isArray(b.checklistTemplate) ? b.checklistTemplate : estadoPadrao().checklistTemplate,
+      colunaNestingCsv: (typeof b.colunaNestingCsv === 'string' && b.colunaNestingCsv) ? b.colunaNestingCsv : estadoPadrao().colunaNestingCsv,
+      colunaDescricaoCsv: (typeof b.colunaDescricaoCsv === 'string' && b.colunaDescricaoCsv) ? b.colunaDescricaoCsv : estadoPadrao().colunaDescricaoCsv,
       salvoEm: timestampLocal()
     };
     salvarDB(novoDb);
@@ -363,6 +370,12 @@ function aplicarPost(corpo){
   }
   if (Array.isArray(corpo.checklistTemplate)){
     db.checklistTemplate = corpo.checklistTemplate;
+  }
+  if (typeof corpo.colunaNestingCsv === 'string' && corpo.colunaNestingCsv){
+    db.colunaNestingCsv = corpo.colunaNestingCsv;
+  }
+  if (typeof corpo.colunaDescricaoCsv === 'string' && corpo.colunaDescricaoCsv){
+    db.colunaDescricaoCsv = corpo.colunaDescricaoCsv;
   }
 
   db.logs = anexarNovosPorId(db.logs, corpo.logsNovos);
